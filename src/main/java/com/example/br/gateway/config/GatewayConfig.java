@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
-//    @Autowired
-//    private AuthenticationFilter filter;
+    @Autowired
+    private AuthenticationFilter filter;
 
     private String baseUrl = "http://localhost:";
 
@@ -20,8 +20,12 @@ public class GatewayConfig {
         return builder.routes()
                 .route("event",
                         r -> r.path("/event/**")
-//                                .filters(f -> f.filter(filter))
+                                .filters(f -> f.filter(filter))
                                 .uri("lb://EVENTS-SERVICE")
+                )
+                .route("event",
+                        r -> r.path("/auth/**")
+                                .uri("lb://AUTH-SERVICE")
                 )
                 .build();
     }

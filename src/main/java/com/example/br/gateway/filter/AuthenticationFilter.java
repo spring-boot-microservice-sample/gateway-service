@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.function.Predicate;
 
-//@Component
+@Component
 public class AuthenticationFilter implements GatewayFilter {
 
     @Autowired
@@ -32,7 +32,6 @@ public class AuthenticationFilter implements GatewayFilter {
 
         if(isApiSecured.test(request)){
 
-//            Check Header
             if(!request.getHeaders().containsKey("Authorization")){
 
                 ServerHttpResponse response = exchange.getResponse();
