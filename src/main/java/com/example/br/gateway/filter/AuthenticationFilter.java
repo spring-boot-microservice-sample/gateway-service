@@ -2,6 +2,8 @@ package com.example.br.gateway.filter;
 
 import com.example.br.gateway.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -46,17 +48,25 @@ public class AuthenticationFilter implements GatewayFilter {
                 jwtUtil.validateToken(token);
             } catch (Exception e) {
 
+                System.out.println("TOKEN ERROR" + e.getMessage());
                 ServerHttpResponse response = exchange.getResponse();
-                response.setStatusCode(HttpStatus.BAD_REQUEST);
+                if(e instanceof ExpiredJwtException) {
+                    response.setStatusCode(HttpStatus.REQUEST_TIMEOUT);
+                } else if (e instanceof IllegalArgumentException) {
+                    response.setStatusCode(HttpStatus.NOT_FOUND);
+                } else {
+                    response.setStatusCode(HttpStatus.BAD_REQUEST);
+                }
 
                 return response.setComplete();
             }
 
             Claims claims = jwtUtil.getClaims(token);
-            exchange.getRequest().mutate().header(
-                    "id",
-                    String.valueOf(claims.get("id"))
-            ).build();
+
+            exchange.getRequest()
+                    .mutate()
+                    .header("user_id", String.valueOf(claims.getSubject()))
+                    .build();
         }
 
         return  chain.filter(exchange);
